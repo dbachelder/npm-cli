@@ -16,6 +16,7 @@ None
 - [x] **Phase 4: SSL Certificate Automation** - End-to-end certificate creation and attachment workflow
 - [x] **Phase 5: Configuration Templates** - Reusable templates for common patterns (Authentik, VPN-only, API bypass)
 - [x] **Phase 6: Testing & Documentation** - Reproducible test suite and user-friendly docs for public release
+- [ ] **Phase 7: Distribution** - Package and publish to PyPI for public distribution
 
 ## Phase Details
 
@@ -98,10 +99,23 @@ Plans:
 - [x] 06-01: Integration testing setup (testcontainers, CliRunner, pytest-httpx) — 11 min
 - [x] 06-02: Documentation & Completion (ZSH autocomplete, comprehensive README) — 2 min
 
+### Phase 7: Distribution
+**Goal**: Package and publish npm-cli to PyPI for public distribution
+**Depends on**: Phase 6
+**Plans**: 1/1 complete
+**Status**: Complete
+**Completed**: 2026-01-04
+
+Plans:
+- [x] 07-01: Package and publish to PyPI (metadata, build, local verification) — 15 min
+
+**Details:**
+Complete package metadata with PyPI classifiers, MIT license, successful build with wheel and source distribution, local installation verified. Package ready for PyPI publication (awaiting credentials).
+
 ## Progress
 
 **Execution Order:**
-Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -111,3 +125,4 @@ Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
 | 4. SSL Certificate Automation | 3/3 | Complete | 2026-01-04 |
 | 5. Configuration Templates | 1/1 | Complete | 2026-01-04 |
 | 6. Testing & Documentation | 2/2 | Complete | 2026-01-04 |
+| 7. Distribution | 1/1 | Complete | 2026-01-04 |
