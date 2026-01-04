@@ -83,12 +83,19 @@ def create_proxy_host(
     forward_host: str = typer.Option(..., "--host", "-h", help="Backend hostname/IP"),
     forward_port: int = typer.Option(..., "--port", "-p", help="Backend port"),
     forward_scheme: Literal["http", "https"] = typer.Option("http", "--scheme", "-s", help="Backend protocol"),
-    ssl: bool = typer.Option(False, "--ssl", help="Force SSL redirect"),
+    certificate: int | None = typer.Option(None, "--certificate", "-c", help="Attach SSL certificate by ID"),
+    ssl: bool = typer.Option(False, "--ssl", help="Force HTTPS redirect (requires --certificate)"),
     websocket: bool = typer.Option(False, "--websocket", "-w", help="Allow WebSocket upgrade"),
     http2: bool = typer.Option(True, "--http2", help="Enable HTTP/2 support"),
 ) -> None:
     """Create a new proxy host."""
     try:
+        # Validate SSL options
+        if ssl and not certificate:
+            console.print("[bold red]Error:[/] --ssl requires --certificate to be set")
+            console.print("[dim]You cannot force HTTPS redirect without a certificate attached[/]")
+            raise typer.Exit(1)
+
         # Load settings
         settings = NPMSettings()
 
@@ -98,6 +105,7 @@ def create_proxy_host(
             forward_scheme=forward_scheme,
             forward_host=forward_host,
             forward_port=forward_port,
+            certificate_id=certificate,
             ssl_forced=ssl,
             allow_websocket_upgrade=websocket,
             http2_support=http2,
@@ -118,7 +126,9 @@ def create_proxy_host(
         console.print(f"[green]✓[/] Created proxy host [cyan]{result.id}[/]")
         console.print(f"  Domain: {domain}")
         console.print(f"  Forward: {forward_scheme}://{forward_host}:{forward_port}")
-        console.print(f"  SSL: {'Enabled' if ssl else 'Disabled'}")
+        if certificate:
+            console.print(f"  Certificate: ID {certificate}")
+        console.print(f"  SSL Forced: {'Yes' if ssl else 'No'}")
         console.print(f"  WebSocket: {'Enabled' if websocket else 'Disabled'}")
 
     except NPMConnectionError as e:
@@ -236,7 +246,8 @@ def update_proxy_host(
     forward_host: str = typer.Option(None, "--host", "-h", help="Backend hostname/IP"),
     forward_port: int = typer.Option(None, "--port", "-p", help="Backend port"),
     forward_scheme: Literal["http", "https"] = typer.Option(None, "--scheme", "-s", help="Backend protocol"),
-    ssl: bool = typer.Option(None, "--ssl", help="Force SSL redirect"),
+    certificate: int | None = typer.Option(None, "--certificate", "-c", help="Attach SSL certificate by ID"),
+    ssl: bool | None = typer.Option(None, "--ssl/--no-ssl", help="Enable/disable HTTPS redirect"),
     enabled: bool = typer.Option(None, "--enabled/--disabled", help="Enable or disable proxy host"),
 ) -> None:
     """Update proxy host configuration."""
@@ -252,6 +263,8 @@ def update_proxy_host(
             update_data["forward_port"] = forward_port
         if forward_scheme is not None:
             update_data["forward_scheme"] = forward_scheme
+        if certificate is not None:
+            update_data["certificate_id"] = certificate
         if ssl is not None:
             update_data["ssl_forced"] = ssl
         if enabled is not None:

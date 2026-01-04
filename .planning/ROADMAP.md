@@ -64,13 +64,14 @@ Plans:
 **Depends on**: Phase 3
 **Research**: Completed
 **Research topics**: NPM certificate API, Let's Encrypt integration, certificate attachment workflows
-**Plans**: 2/3 complete
-**Status**: In progress
+**Plans**: 3/3 complete
+**Status**: Complete
+**Completed**: 2026-01-04
 
 Plans:
 - [x] 04-01: Certificate Models & API Foundation (Pydantic models, TDD) — 5 min
 - [x] 04-02: Certificate API Client Methods (CRUD + workflow helper, TDD) — 6 min
-- [ ] 04-03: Certificate CLI Commands
+- [x] 04-03: Certificate CLI Commands (Rich formatting, proxy integration) — 14 min
 
 ### Phase 5: Configuration Templates
 **Goal**: Implement reusable template system for common patterns (Authentik forward auth, VPN-only access, API bypass paths)
