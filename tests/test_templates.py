@@ -7,6 +7,7 @@ from npm_cli.templates.nginx import (
     api_webhook_bypass,
     vpn_only_access,
     websocket_support,
+    authentik_with_bypass,
 )
 
 
@@ -155,3 +156,101 @@ class TestWebSocketSupport:
 
         # Should NOT have location block wrapper
         assert "location" not in config.lower()
+
+
+class TestAuthentikWithBypass:
+    """Tests for combined Authentik + API bypass template."""
+
+    def test_combined_template_structure(self):
+        """Test combined template has all required components."""
+        config = authentik_with_bypass(
+            backend="http://n8n:5678",
+            bypass_paths=["/api/", "/webhook/"],
+            vpn_only=True
+        )
+
+        # Should have bypass location blocks (unauthenticated)
+        assert "location /api/" in config
+        assert "location /webhook/" in config
+
+        # Should have Authentik outpost location
+        assert "location /outpost.goauthentik.io" in config
+        assert "internal;" in config
+
+        # Should have main location with auth_request
+        assert "location /" in config
+        assert "auth_request /outpost.goauthentik.io/auth" in config
+
+        # All should proxy to same backend
+        assert config.count("proxy_pass http://n8n:5678") == 3
+
+    def test_combined_with_vpn_restrictions(self):
+        """Test combined template includes network ACLs when vpn_only=True."""
+        config = authentik_with_bypass(
+            backend="http://app:8000",
+            bypass_paths=["/api/"],
+            vpn_only=True,
+            vpn_network="10.10.10.0/24",
+            lan_network="192.168.7.0/24"
+        )
+
+        # VPN restrictions should be in main location block (not bypass paths)
+        assert "allow 10.10.10.0/24" in config
+        assert "allow 192.168.7.0/24" in config
+        assert "deny all" in config
+
+    def test_combined_without_vpn_restrictions(self):
+        """Test combined template without network ACLs."""
+        config = authentik_with_bypass(
+            backend="http://app:8000",
+            bypass_paths=["/webhook/"],
+            vpn_only=False
+        )
+
+        # Should NOT have network restrictions
+        assert "allow 10.10.10.0/24" not in config
+        assert "deny all" not in config
+
+        # But should still have all other components
+        assert "location /webhook/" in config
+        assert "location /outpost.goauthentik.io" in config
+        assert "auth_request /outpost.goauthentik.io/auth" in config
+
+    def test_combined_with_multiple_bypass_paths(self):
+        """Test combined template with multiple bypass paths."""
+        config = authentik_with_bypass(
+            backend="http://n8n:5678",
+            bypass_paths=["/api/", "/webhook/", "/webhook-test/"]
+        )
+
+        # Each bypass path should have its own location block
+        assert "location /api/" in config
+        assert "location /webhook/" in config
+        assert "location /webhook-test/" in config
+
+        # Plus Authentik locations
+        assert "location /outpost.goauthentik.io" in config
+        assert "location /" in config
+
+    def test_production_n8n_pattern(self):
+        """Test template matches production n8n proxy pattern."""
+        config = authentik_with_bypass(
+            backend="http://n8n:5678",
+            bypass_paths=["~ ^/webhook(-test)?/", "/api/"],
+            vpn_only=True,
+            vpn_network="10.10.10.0/24",
+            lan_network="192.168.7.0/24"
+        )
+
+        # Regex webhook pattern
+        assert "location ~ ^/webhook(-test)?/" in config
+
+        # Standard API bypass
+        assert "location /api/" in config
+
+        # Authentik protection with VPN restrictions
+        assert "location /outpost.goauthentik.io" in config
+        assert "auth_request /outpost.goauthentik.io/auth" in config
+        assert "allow 10.10.10.0/24" in config
+        assert "allow 192.168.7.0/24" in config
+        assert "deny all" in config
