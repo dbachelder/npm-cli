@@ -22,8 +22,15 @@ def test_valid_config_loads_successfully():
     assert settings.use_docker_discovery is True
 
 
-def test_missing_required_fields_use_defaults():
+def test_missing_required_fields_use_defaults(monkeypatch, tmp_path):
     """Missing optional fields use default values."""
+    # Clear NPM_ environment variables to test defaults
+    for key in ["NPM_API_URL", "NPM_CONTAINER_NAME", "NPM_USERNAME", "NPM_PASSWORD", "NPM_USE_DOCKER_DISCOVERY"]:
+        monkeypatch.delenv(key, raising=False)
+
+    # Change to temp directory to avoid loading project .env file
+    monkeypatch.chdir(tmp_path)
+
     settings = NPMSettings()
     assert str(settings.api_url) == "http://localhost:81/"
     assert settings.container_name == "nginx-proxy-manager"
