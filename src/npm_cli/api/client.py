@@ -24,6 +24,8 @@ from npm_cli.api.models import (
     ProxyHost,
     ProxyHostCreate,
     ProxyHostUpdate,
+    Certificate,
+    CertificateCreate,
 )
 from npm_cli.api.exceptions import NPMAPIError, NPMConnectionError, NPMValidationError
 
@@ -331,5 +333,131 @@ class NPMClient:
                 raise NPMAPIError(f"Proxy host {host_id} not found")
             raise NPMAPIError(
                 f"Failed to delete proxy host: {e.response.status_code}",
+                response=e.response
+            )
+
+    def certificate_create(self, cert: CertificateCreate) -> Certificate:
+        """Create Let's Encrypt certificate via NPM API.
+
+        NPM delegates to Certbot internally for ACME protocol.
+        Supports HTTP-01 and DNS-01 challenges.
+
+        Args:
+            cert: CertificateCreate model with certificate configuration
+
+        Returns:
+            Certificate object with server-generated fields
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If NPM API returns an error response
+            NPMValidationError: If response schema doesn't match expected format
+        """
+        try:
+            response = self.request(
+                "POST",
+                "/api/nginx/certificates",
+                json=cert.model_dump(exclude_none=True)
+            )
+            response.raise_for_status()
+            return Certificate.model_validate(response.json())
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            raise NPMAPIError(
+                f"Failed to create certificate: {e.response.status_code}",
+                response=e.response
+            )
+        except ValidationError as e:
+            raise NPMValidationError(
+                "NPM API response schema changed",
+                validation_error=e
+            )
+
+    def certificate_list(self) -> list[Certificate]:
+        """List all certificates.
+
+        Returns:
+            List of Certificate objects
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If NPM API returns an error response
+            NPMValidationError: If response schema doesn't match expected format
+        """
+        try:
+            response = self.request("GET", "/api/nginx/certificates")
+            response.raise_for_status()
+            data = response.json()
+            return [Certificate.model_validate(c) for c in data]
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            raise NPMAPIError(
+                f"Failed to list certificates: {e.response.status_code}",
+                response=e.response
+            )
+        except ValidationError as e:
+            raise NPMValidationError(
+                "NPM API response schema changed",
+                validation_error=e
+            )
+
+    def certificate_get(self, cert_id: int) -> Certificate:
+        """Get certificate by ID.
+
+        Args:
+            cert_id: Certificate ID to retrieve
+
+        Returns:
+            Certificate object
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If certificate not found or other API error
+            NPMValidationError: If response schema doesn't match expected format
+        """
+        try:
+            response = self.request("GET", f"/api/nginx/certificates/{cert_id}")
+            response.raise_for_status()
+            return Certificate.model_validate(response.json())
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise NPMAPIError(f"Certificate {cert_id} not found")
+            raise NPMAPIError(
+                f"Failed to get certificate: {e.response.status_code}",
+                response=e.response
+            )
+        except ValidationError as e:
+            raise NPMValidationError(
+                "NPM API response schema changed",
+                validation_error=e
+            )
+
+    def certificate_delete(self, cert_id: int) -> None:
+        """Delete certificate.
+
+        WARNING: Deleting certificate attached to proxy hosts breaks those hosts.
+        Caller should check certificate_id usage before deletion.
+
+        Args:
+            cert_id: Certificate ID to delete
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If certificate not found or other API error
+        """
+        try:
+            response = self.request("DELETE", f"/api/nginx/certificates/{cert_id}")
+            response.raise_for_status()
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise NPMAPIError(f"Certificate {cert_id} not found")
+            raise NPMAPIError(
+                f"Failed to delete certificate: {e.response.status_code}",
                 response=e.response
             )
