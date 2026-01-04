@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-04)
 ## Current Position
 
 Phase: 2 of 6 (NPM Connection & Authentication)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-01-04 — Completed 02-01-PLAN.md
+Last activity: 2026-01-04 — Completed 02-02-PLAN.md
 
 Progress: ████░░░░░░ 17% (1 of 6 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 7.5 min
-- Total execution time: 15 min
+- Total plans completed: 3
+- Average duration: 6.7 min
+- Total execution time: 20 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 1 | 8 min | 8 min |
-| 2. Connection & Auth | 1 | 7 min | 7 min |
+| 2. Connection & Auth | 2 | 12 min | 6 min |
 
 **Recent Trend:**
-- Last plan: 7 min
-- Trend: Consistent execution velocity (7-8 min per plan)
+- Last plan: 5 min
+- Trend: Improving velocity (5-8 min per plan)
 
 ## Accumulated Context
 
@@ -48,7 +48,9 @@ Recent decisions affecting current work:
 | 1 | Typer subcommands with Rich console output | Professional CLI UX following RESEARCH.md patterns |
 | 2 | TDD approach for settings module | RED-GREEN-REFACTOR cycle with atomic commits improves design quality |
 | 2 | NPM_ environment variable prefix | Clear namespacing for configuration |
-| 2 | Optional username/password in settings | Support future keyring storage for credentials |
+| 2 | File-based token caching (not keyring) | Simpler for MVP, tokens expire anyway in 24-48 hours |
+| 2 | httpx client with 30s timeout | Prevent CLI hangs per RESEARCH.md Pitfall #4 |
+| 2 | Three-strategy Docker discovery | Maximum compatibility across deployment patterns (name → label → patterns) |
 
 ### Deferred Issues
 
@@ -60,6 +62,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-04 19:11Z
-Stopped at: Completed 02-01-PLAN.md (Phase 2, plan 1 of 3)
+Last session: 2026-01-04 19:20Z
+Stopped at: Completed 02-02-PLAN.md (Phase 2, plan 2 of 3)
 Resume file: None

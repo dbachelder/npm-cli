@@ -24,7 +24,7 @@
 - **Configuration fields**: api_url (HttpUrl with default), container_name (str with default), username/password (optional), use_docker_discovery (bool with default)
 - **Validation strategy**: Strict Pydantic models with `extra="forbid"` to catch NPM API schema changes early
 - **Environment prefix**: NPM_ prefix for all environment variables for clear namespacing
-- **Credential storage approach**: username/password fields optional in settings to support keyring storage (future phase)
+- **Credential storage approach**: username/password fields optional in settings to support interactive credential prompting (future phase)
 
 ## Issues Encountered
 
