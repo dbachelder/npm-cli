@@ -33,7 +33,7 @@ class ProxyHostCreate(BaseModel):
     Used for POST /api/nginx/proxy-hosts to create new proxy host entries.
     Based on NPM JSON Schema v2.9.6.
     """
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="ignore", strict=True)
 
     # Required fields
     domain_names: list[str] = Field(
@@ -105,8 +105,8 @@ class ProxyHostCreate(BaseModel):
         default_factory=dict,
         description="Metadata storage"
     )
-    locations: list[dict] = Field(
-        default_factory=list,
+    locations: list[dict] | None = Field(
+        default=None,
         description="Custom location blocks"
     )
 
@@ -130,7 +130,7 @@ class ProxyHostUpdate(BaseModel):
     Used for PUT /api/nginx/proxy-hosts/{id} to update existing entries.
     All fields are optional to support partial updates.
     """
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="ignore", strict=True)
 
     domain_names: list[str] | None = Field(
         default=None,

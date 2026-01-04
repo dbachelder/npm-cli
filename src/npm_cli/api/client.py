@@ -249,6 +249,14 @@ class NPMClient:
     def update_proxy_host(self, host_id: int, updates: ProxyHostUpdate) -> ProxyHost:
         """Update existing proxy host.
 
+        The NPM API requires the full object for PUT requests, but only accepts
+        writable fields (rejects read-only fields like id, created_on, etc).
+        So we:
+        1. GET the current proxy host
+        2. Extract only writable fields (ProxyHostCreate fields)
+        3. Merge the updates into writable fields
+        4. PUT the merged writable fields back
+
         Args:
             host_id: Proxy host ID to update
             updates: ProxyHostUpdate model with fields to update (partial)
@@ -262,10 +270,29 @@ class NPMClient:
             NPMValidationError: If response schema doesn't match expected format
         """
         try:
+            # First, get the current proxy host
+            current = self.get_proxy_host(host_id)
+
+            # Convert to ProxyHostCreate (only writable fields, excludes id/created_on/etc)
+            writable_fields = ProxyHostCreate.model_fields.keys()
+            current_data = {
+                k: v for k, v in current.model_dump(mode="json").items()
+                if k in writable_fields
+            }
+
+            # Normalize null locations to empty array (API requires array, not null)
+            if current_data.get("locations") is None:
+                current_data["locations"] = []
+
+            # Merge updates into writable fields
+            update_data = updates.model_dump(exclude_none=True, mode="json")
+            current_data.update(update_data)
+
+            # Send only writable fields back
             response = self.request(
                 "PUT",
                 f"/api/nginx/proxy-hosts/{host_id}",
-                json=updates.model_dump(exclude_none=True, mode="json")
+                json=current_data
             )
             response.raise_for_status()
             return ProxyHost.model_validate(response.json())
