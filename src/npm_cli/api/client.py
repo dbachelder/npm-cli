@@ -357,7 +357,7 @@ class NPMClient:
             response = self.request(
                 "POST",
                 "/api/nginx/certificates",
-                json=cert.model_dump(exclude_none=True)
+                json=cert.model_dump(exclude_none=True, mode="json")
             )
             response.raise_for_status()
             return Certificate.model_validate(response.json())
