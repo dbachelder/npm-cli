@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-04)
 
 ## Current Position
 
-Phase: 4 of 6 (SSL Certificate Automation)
-Plan: 3 of 3 in current phase
+Phase: 5 of 6 (Configuration Templates)
+Plan: 1 of 1 in current phase
 Status: Phase complete
-Last activity: 2026-01-04 — Completed 04-03-PLAN.md
+Last activity: 2026-01-04 — Completed 05-01-PLAN.md
 
-Progress: ██████████ 83% (10 of 12 plans complete)
+Progress: ███████████ 92% (11 of 12 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 12 min
-- Total execution time: 119 min
+- Total plans completed: 11
+- Average duration: 11 min
+- Total execution time: 125 min
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: ██████████ 83% (10 of 12 plans complete)
 | 2. Connection & Auth | 3 | 34 min | 11 min |
 | 3. Proxy Host Management | 3 | 52 min | 17 min |
 | 4. SSL Certificate Automation | 3 | 25 min | 8 min |
+| 5. Configuration Templates | 1 | 6 min | 6 min |
 
 **Recent Trend:**
-- Last plan: 14 min
-- Trend: Stable execution with bug discovery and API exploration - undocumented NPM API required runtime investigation
+- Last plan: 6 min
+- Trend: Excellent execution speed with TDD - pure functions highly testable, no API integration complexity
 
 ## Accumulated Context
 
@@ -67,6 +68,11 @@ Recent decisions affecting current work:
 | 4 | ValueError for business logic errors | Use ValueError (not NPMAPIError) when proxy host not found - clearer error semantics than API errors |
 | 4 | Empty meta field for HTTP-01 challenges | NPM stores letsencrypt_email at account level, not per-certificate - meta={} for HTTP-01, only populate for DNS challenges |
 | 4 | Certificate lookup by domain name | Following proxy pattern, cert show accepts ID or domain - searches domain_names array, improves UX over ID-only lookup |
+| 5 | Pure template functions over classes | Template functions return strings - simpler, more testable, easier to compose than class-based approach |
+| 5 | Literal type for template names | Provides CLI autocomplete/validation for template_name argument - better UX than plain strings |
+| 5 | Combined template composition | authentik_with_bypass() composes existing functions instead of duplicating - DRY principle, maintains single source of truth |
+| 5 | Auto-detect backend from proxy host | CLI auto-constructs backend URL from proxy host if --backend not provided - reduces typing for common case |
+| 5 | Default vpn_only=True for authentik-bypass | Security-first default matching production best practice - opt-out if needed rather than opt-in |
 
 ### Deferred Issues
 
@@ -79,6 +85,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-04
-Stopped at: Completed 04-03-PLAN.md (Phase 4 complete)
+Stopped at: Completed 05-01-PLAN.md (Phase 5 complete)
 Resume file: None
-Next action: Plan Phase 5 (Configuration Templates) with /gsd:plan-phase 5
+Next action: Plan Phase 6 (Testing & Documentation) - final phase!
