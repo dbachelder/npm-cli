@@ -62,6 +62,19 @@ class NPMClient:
 
         # Call NPM authentication endpoint
         response = self.client.post("/api/tokens", json=request_data.model_dump())
+
+        # Provide detailed error for debugging
+        if not response.is_success:
+            try:
+                error_detail = response.json()
+            except Exception:
+                error_detail = response.text
+            raise httpx.HTTPStatusError(
+                f"Authentication failed: {response.status_code} - {error_detail}",
+                request=response.request,
+                response=response
+            )
+
         response.raise_for_status()
 
         # Parse response using Pydantic model
