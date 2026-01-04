@@ -34,12 +34,15 @@ Plans:
 ### Phase 2: NPM Connection & Authentication
 **Goal**: Implement Docker container discovery and NPM API authentication
 **Depends on**: Phase 1
-**Research**: Likely (external integration)
+**Research**: Completed
 **Research topics**: NPM API authentication (token/session-based), Docker API for container discovery, connection configuration
-**Plans**: TBD
+**Plans**: 1/3 complete
+**Status**: In progress
 
 Plans:
-- [ ] TBD during phase planning
+- [x] 02-01: Configuration Setup (dependencies, settings module with TDD) — 7 min
+- [ ] 02-02: Connection Core (Docker discovery, NPM API client)
+- [ ] 02-03: Authentication (token management, credential storage)
 
 ### Phase 3: Proxy Host Management
 **Goal**: Implement complete proxy host lifecycle (create, list, update, delete) via NPM API
@@ -87,7 +90,7 @@ Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 1/1 | Complete | 2026-01-04 |
-| 2. NPM Connection & Authentication | 0/TBD | Not started | - |
+| 2. NPM Connection & Authentication | 1/3 | In progress | - |
 | 3. Proxy Host Management | 0/TBD | Not started | - |
 | 4. SSL Certificate Automation | 0/TBD | Not started | - |
 | 5. Configuration Templates | 0/TBD | Not started | - |
