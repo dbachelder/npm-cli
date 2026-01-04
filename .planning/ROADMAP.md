@@ -12,7 +12,7 @@ None
 
 - [x] **Phase 1: Foundation** - Project setup, NPM API discovery, and basic CLI structure
 - [x] **Phase 2: NPM Connection & Authentication** - Docker container discovery, API authentication, and connection management
-- [ ] **Phase 3: Proxy Host Management** - Core CRUD operations for proxy hosts via NPM API
+- [x] **Phase 3: Proxy Host Management** - Core CRUD operations for proxy hosts via NPM API
 - [ ] **Phase 4: SSL Certificate Automation** - End-to-end certificate creation and attachment workflow
 - [ ] **Phase 5: Configuration Templates** - Reusable templates for common patterns (Authentik, VPN-only, API bypass)
 - [ ] **Phase 6: Testing & Documentation** - Reproducible test suite and user-friendly docs for public release
@@ -62,12 +62,15 @@ Plans:
 ### Phase 4: SSL Certificate Automation
 **Goal**: End-to-end SSL certificate workflow from creation to NPM integration to proxy host attachment
 **Depends on**: Phase 3
-**Research**: Likely (external API, certificate management)
+**Research**: Completed
 **Research topics**: NPM certificate API, Let's Encrypt integration, certificate attachment workflows
-**Plans**: TBD
+**Plans**: 1/3 complete
+**Status**: In progress
 
 Plans:
-- [ ] TBD during phase planning
+- [x] 04-01: Certificate Models & API Foundation (Pydantic models, TDD) — 5 min
+- [ ] 04-02: Certificate API Client Methods
+- [ ] 04-03: Certificate CLI Commands
 
 ### Phase 5: Configuration Templates
 **Goal**: Implement reusable template system for common patterns (Authentik forward auth, VPN-only access, API bypass paths)
@@ -97,6 +100,6 @@ Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation | 1/1 | Complete | 2026-01-04 |
 | 2. NPM Connection & Authentication | 3/3 | Complete | 2026-01-04 |
 | 3. Proxy Host Management | 3/3 | Complete | 2026-01-04 |
-| 4. SSL Certificate Automation | 0/TBD | Not started | - |
+| 4. SSL Certificate Automation | 1/3 | In progress | - |
 | 5. Configuration Templates | 0/TBD | Not started | - |
 | 6. Testing & Documentation | 0/TBD | Not started | - |
