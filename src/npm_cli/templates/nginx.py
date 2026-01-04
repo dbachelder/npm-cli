@@ -127,3 +127,44 @@ def websocket_support() -> str:
     return """proxy_http_version 1.1;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection "upgrade";"""
+
+
+def authentik_with_bypass(
+    backend: str,
+    bypass_paths: list[str],
+    vpn_only: bool = True,
+    vpn_network: str = "10.10.10.0/24",
+    lan_network: str = "192.168.7.0/24"
+) -> str:
+    """Generate combined Authentik auth + API/webhook bypass configuration.
+
+    Most common production pattern: unauthenticated API/webhook endpoints
+    with Authentik-protected main application and VPN/LAN restrictions.
+
+    Based on production n8n proxy (ID 7) with webhook/API bypass + Authentik auth.
+
+    Args:
+        backend: Backend URL (e.g., "http://n8n:5678")
+        bypass_paths: Paths to bypass auth (e.g., ["/api/", "/webhook/"])
+        vpn_only: Include VPN/LAN network restrictions (default: True)
+        vpn_network: VPN network CIDR (default: 10.10.10.0/24 for WireGuard)
+        lan_network: LAN network CIDR (default: 192.168.7.0/24)
+
+    Returns:
+        Nginx configuration with bypass locations, Authentik outpost, and protected root
+    """
+    # Generate bypass location blocks (unauthenticated)
+    bypass_config = api_webhook_bypass(backend=backend, paths=bypass_paths)
+
+    # Generate Authentik forward auth config (with VPN restrictions)
+    auth_config = authentik_forward_auth(
+        backend=backend,
+        vpn_only=vpn_only,
+        vpn_network=vpn_network,
+        lan_network=lan_network
+    )
+
+    # Combine in correct order: bypass paths first, then Authentik protection
+    return f"""{bypass_config}
+
+{auth_config}"""

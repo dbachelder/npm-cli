@@ -16,6 +16,7 @@ from npm_cli.templates.nginx import (
     api_webhook_bypass,
     vpn_only_access,
     websocket_support,
+    authentik_with_bypass,
 )
 
 app = typer.Typer(help="Manage proxy hosts")
@@ -371,7 +372,7 @@ def delete_proxy_host(
 @app.command("template")
 def apply_template(
     host_id: int = typer.Argument(..., help="Proxy host ID to apply template to"),
-    template_name: Literal["authentik", "api-bypass", "vpn-only", "websocket"] = typer.Argument(..., help="Template to apply"),
+    template_name: Literal["authentik", "api-bypass", "vpn-only", "websocket", "authentik-bypass"] = typer.Argument(..., help="Template to apply"),
     backend: str = typer.Option(None, "--backend", "-b", help="Backend URL (e.g., http://app:8000)"),
     paths: list[str] = typer.Option(None, "--path", "-p", help="Paths for api-bypass template (repeat for multiple)"),
     vpn_network: str = typer.Option("10.10.10.0/24", "--vpn-network", help="VPN network CIDR"),
@@ -418,6 +419,21 @@ def apply_template(
                 raise typer.Exit(1)
 
             template_config = api_webhook_bypass(backend=backend, paths=list(paths))
+
+        elif template_name == "authentik-bypass":
+            # Combined Authentik + API bypass requires paths
+            if not paths:
+                console.print("[bold red]Error:[/] --path is required for authentik-bypass template")
+                console.print("[dim]Example: npm-cli proxy template 7 authentik-bypass --path /api/ --path /webhook/[/]")
+                raise typer.Exit(1)
+
+            template_config = authentik_with_bypass(
+                backend=backend,
+                bypass_paths=list(paths),
+                vpn_only=True,  # Default to VPN restrictions for security
+                vpn_network=vpn_network,
+                lan_network=lan_network
+            )
 
         elif template_name == "vpn-only":
             template_config = vpn_only_access(
