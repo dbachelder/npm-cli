@@ -18,7 +18,13 @@ from pathlib import Path
 import httpx
 from pydantic import ValidationError
 
-from npm_cli.api.models import TokenRequest, TokenResponse, ProxyHost
+from npm_cli.api.models import (
+    TokenRequest,
+    TokenResponse,
+    ProxyHost,
+    ProxyHostCreate,
+    ProxyHostUpdate,
+)
 from npm_cli.api.exceptions import NPMAPIError, NPMConnectionError, NPMValidationError
 
 
@@ -203,4 +209,100 @@ class NPMClient:
             raise NPMValidationError(
                 "NPM API response schema changed",
                 validation_error=e
+            )
+
+    def create_proxy_host(self, host: ProxyHostCreate) -> ProxyHost:
+        """Create new proxy host.
+
+        Args:
+            host: ProxyHostCreate model with proxy host configuration
+
+        Returns:
+            ProxyHost object with server-generated fields
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If NPM API returns an error response
+            NPMValidationError: If response schema doesn't match expected format
+        """
+        try:
+            response = self.request(
+                "POST",
+                "/api/nginx/proxy-hosts",
+                json=host.model_dump(exclude_none=True, mode="json")
+            )
+            response.raise_for_status()
+            return ProxyHost.model_validate(response.json())
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            raise NPMAPIError(
+                f"Failed to create proxy host: {e.response.status_code}",
+                response=e.response
+            )
+        except ValidationError as e:
+            raise NPMValidationError(
+                "NPM API response schema changed",
+                validation_error=e
+            )
+
+    def update_proxy_host(self, host_id: int, updates: ProxyHostUpdate) -> ProxyHost:
+        """Update existing proxy host.
+
+        Args:
+            host_id: Proxy host ID to update
+            updates: ProxyHostUpdate model with fields to update (partial)
+
+        Returns:
+            Updated ProxyHost object
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If proxy host not found or other API error
+            NPMValidationError: If response schema doesn't match expected format
+        """
+        try:
+            response = self.request(
+                "PUT",
+                f"/api/nginx/proxy-hosts/{host_id}",
+                json=updates.model_dump(exclude_none=True, mode="json")
+            )
+            response.raise_for_status()
+            return ProxyHost.model_validate(response.json())
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise NPMAPIError(f"Proxy host {host_id} not found")
+            raise NPMAPIError(
+                f"Failed to update proxy host: {e.response.status_code}",
+                response=e.response
+            )
+        except ValidationError as e:
+            raise NPMValidationError(
+                "NPM API response schema changed",
+                validation_error=e
+            )
+
+    def delete_proxy_host(self, host_id: int) -> None:
+        """Delete proxy host.
+
+        Args:
+            host_id: Proxy host ID to delete
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If proxy host not found or other API error
+        """
+        try:
+            response = self.request("DELETE", f"/api/nginx/proxy-hosts/{host_id}")
+            response.raise_for_status()
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise NPMAPIError(f"Proxy host {host_id} not found")
+            raise NPMAPIError(
+                f"Failed to delete proxy host: {e.response.status_code}",
+                response=e.response
             )
