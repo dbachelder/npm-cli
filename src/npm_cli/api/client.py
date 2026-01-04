@@ -16,8 +16,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
+from pydantic import ValidationError
 
-from npm_cli.api.models import TokenRequest, TokenResponse
+from npm_cli.api.models import TokenRequest, TokenResponse, ProxyHost
+from npm_cli.api.exceptions import NPMAPIError, NPMConnectionError, NPMValidationError
 
 
 class NPMClient:
@@ -140,3 +142,65 @@ class NPMClient:
         headers["Authorization"] = f"Bearer {token}"
 
         return self.client.request(method, endpoint, headers=headers, **kwargs)
+
+    def list_proxy_hosts(self) -> list[ProxyHost]:
+        """List all proxy hosts from NPM.
+
+        Returns:
+            List of ProxyHost objects
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If NPM API returns an error response
+            NPMValidationError: If response schema doesn't match expected format
+        """
+        try:
+            response = self.request("GET", "/api/nginx/proxy-hosts")
+            response.raise_for_status()
+            data = response.json()
+            return [ProxyHost.model_validate(item) for item in data]
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            raise NPMAPIError(
+                f"Failed to list proxy hosts: {e.response.status_code}",
+                response=e.response
+            )
+        except ValidationError as e:
+            raise NPMValidationError(
+                "NPM API response schema changed",
+                validation_error=e
+            )
+
+    def get_proxy_host(self, host_id: int) -> ProxyHost:
+        """Get single proxy host by ID.
+
+        Args:
+            host_id: Proxy host ID to retrieve
+
+        Returns:
+            ProxyHost object
+
+        Raises:
+            NPMConnectionError: If NPM API cannot be reached
+            NPMAPIError: If proxy host not found or other API error
+            NPMValidationError: If response schema doesn't match expected format
+        """
+        try:
+            response = self.request("GET", f"/api/nginx/proxy-hosts/{host_id}")
+            response.raise_for_status()
+            return ProxyHost.model_validate(response.json())
+        except httpx.ConnectError:
+            raise NPMConnectionError(f"Cannot connect to NPM at {self.base_url}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise NPMAPIError(f"Proxy host {host_id} not found")
+            raise NPMAPIError(
+                f"Failed to get proxy host: {e.response.status_code}",
+                response=e.response
+            )
+        except ValidationError as e:
+            raise NPMValidationError(
+                "NPM API response schema changed",
+                validation_error=e
+            )
