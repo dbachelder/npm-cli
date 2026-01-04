@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-04)
 ## Current Position
 
 Phase: 2 of 6 (NPM Connection & Authentication)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-04 — Completed 02-02-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-01-04 — Completed 02-03-PLAN.md
 
-Progress: ████░░░░░░ 17% (1 of 6 phases complete)
+Progress: █████░░░░░ 33% (2 of 6 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 6.7 min
-- Total execution time: 20 min
+- Total plans completed: 4
+- Average duration: 10.5 min
+- Total execution time: 42 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 1 | 8 min | 8 min |
-| 2. Connection & Auth | 2 | 12 min | 6 min |
+| 2. Connection & Auth | 3 | 34 min | 11 min |
 
 **Recent Trend:**
-- Last plan: 5 min
-- Trend: Improving velocity (5-8 min per plan)
+- Last plan: 22 min
+- Trend: Longer plan due to checkpoint verification and debugging
 
 ## Accumulated Context
 
@@ -51,6 +51,9 @@ Recent decisions affecting current work:
 | 2 | File-based token caching (not keyring) | Simpler for MVP, tokens expire anyway in 24-48 hours |
 | 2 | httpx client with 30s timeout | Prevent CLI hangs per RESEARCH.md Pitfall #4 |
 | 2 | Three-strategy Docker discovery | Maximum compatibility across deployment patterns (name → label → patterns) |
+| 2 | Username display in status command | Debug visibility for .env configuration validation |
+| 2 | Enhanced error messages with API response details | Critical for debugging authentication and connection issues |
+| 2 | Email format required for NPM authentication | NPM API requires email in identity field, not plain username |
 
 ### Deferred Issues
 
@@ -62,6 +65,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-04 19:20Z
-Stopped at: Completed 02-02-PLAN.md (Phase 2, plan 2 of 3)
+Last session: 2026-01-04 19:48Z
+Stopped at: Completed 02-03-PLAN.md (Phase 2 complete - all 3 plans finished)
 Resume file: None
