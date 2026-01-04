@@ -64,12 +64,12 @@ Plans:
 **Depends on**: Phase 3
 **Research**: Completed
 **Research topics**: NPM certificate API, Let's Encrypt integration, certificate attachment workflows
-**Plans**: 1/3 complete
+**Plans**: 2/3 complete
 **Status**: In progress
 
 Plans:
 - [x] 04-01: Certificate Models & API Foundation (Pydantic models, TDD) — 5 min
-- [ ] 04-02: Certificate API Client Methods
+- [x] 04-02: Certificate API Client Methods (CRUD + workflow helper, TDD) — 6 min
 - [ ] 04-03: Certificate CLI Commands
 
 ### Phase 5: Configuration Templates

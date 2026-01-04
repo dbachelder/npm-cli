@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-04)
 ## Current Position
 
 Phase: 4 of 6 (SSL Certificate Automation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-01-04 — Completed 04-01-PLAN.md
+Last activity: 2026-01-04 — Completed 04-02-PLAN.md
 
-Progress: ████████░░ 67% (8 of 12 plans complete)
+Progress: █████████░ 75% (9 of 12 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 12 min
-- Total execution time: 99 min
+- Total execution time: 105 min
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: ████████░░ 67% (8 of 12 plans complete)
 | 1. Foundation | 1 | 8 min | 8 min |
 | 2. Connection & Auth | 3 | 34 min | 11 min |
 | 3. Proxy Host Management | 3 | 52 min | 17 min |
-| 4. SSL Certificate Automation | 1 | 5 min | 5 min |
+| 4. SSL Certificate Automation | 2 | 11 min | 6 min |
 
 **Recent Trend:**
-- Last plan: 5 min
-- Trend: TDD model implementation - fully autonomous subagent execution with clean RED-GREEN-REFACTOR cycle
+- Last plan: 6 min
+- Trend: Efficient TDD execution with autonomous subagent - RED-GREEN workflow with atomic commits
 
 ## Accumulated Context
 
@@ -63,6 +63,8 @@ Recent decisions affecting current work:
 | 3 | Domain-based lookup for show command | UX improvement - users remember domains better than IDs, searches domain_names field |
 | 4 | Certificate model inheritance pattern | Certificate inherits from CertificateCreate following proven ProxyHost pattern |
 | 4 | meta field as dict type | Flexible structure to accommodate various DNS provider configurations for future DNS challenge support |
+| 4 | Workflow helper pattern for cert attachment | attach_certificate_to_proxy combines cert creation + proxy update into single operation, simplifies common 3-step workflow |
+| 4 | ValueError for business logic errors | Use ValueError (not NPMAPIError) when proxy host not found - clearer error semantics than API errors |
 
 ### Deferred Issues
 
@@ -75,6 +77,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-04
-Stopped at: Completed 04-01-PLAN.md
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
-Next action: Execute 04-02-PLAN.md (Certificate API Client Methods)
+Next action: Execute 04-03-PLAN.md (Certificate CLI Commands)
