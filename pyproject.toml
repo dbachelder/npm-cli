@@ -1,12 +1,27 @@
 [project]
 name = "npm-cli"
 version = "0.1.0"
-description = "Add your description here"
+description = "Command-line tool for managing Nginx Proxy Manager via API"
 readme = "README.md"
 authors = [
     { name = "dan", email = "dan@zumper.com" }
 ]
 requires-python = ">=3.11"
+license = { file = "LICENSE" }
+keywords = ["nginx", "proxy-manager", "npm", "cli", "docker", "ssl", "certificate"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Security",
+    "Environment :: Console",
+]
 dependencies = [
     "docker>=7.1.0",
     "httpx>=0.28.1",
@@ -16,6 +31,12 @@ dependencies = [
     "rich>=14.2.0",
     "typer>=0.21.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/npm-cli"
+Repository = "https://github.com/yourusername/npm-cli"
+Issues = "https://github.com/yourusername/npm-cli/issues"
+Documentation = "https://github.com/yourusername/npm-cli#readme"
 
 [project.scripts]
 npm-cli = "npm_cli.__main__:main"
