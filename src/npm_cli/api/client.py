@@ -461,3 +461,53 @@ class NPMClient:
                 f"Failed to delete certificate: {e.response.status_code}",
                 response=e.response
             )
+
+    def attach_certificate_to_proxy(
+        self,
+        domain: str,
+        cert: CertificateCreate,
+        ssl_forced: bool = True,
+        hsts_enabled: bool = True
+    ) -> tuple[Certificate, ProxyHost]:
+        """Create certificate and attach to proxy host in one operation.
+
+        Workflow:
+        1. Create Let's Encrypt certificate
+        2. Find proxy host by domain name
+        3. Update proxy host with certificate_id and SSL settings
+
+        Args:
+            domain: Domain name to find proxy host
+            cert: Certificate creation parameters
+            ssl_forced: Enable HTTPS redirect (default: True)
+            hsts_enabled: Enable HSTS header (default: True)
+
+        Returns:
+            Tuple of (created certificate, updated proxy host)
+
+        Raises:
+            ValueError: If proxy host not found for domain
+            NPMAPIError: If certificate creation or proxy update fails
+        """
+        # 1. Create certificate
+        created_cert = self.certificate_create(cert)
+
+        # 2. Find proxy host by domain
+        proxy_hosts = self.list_proxy_hosts()
+        proxy = next((h for h in proxy_hosts if domain in h.domain_names), None)
+
+        if not proxy:
+            raise ValueError(f"Proxy host not found for domain: {domain}")
+
+        # 3. Attach certificate to proxy host
+        updated_proxy = self.update_proxy_host(
+            host_id=proxy.id,
+            updates=ProxyHostUpdate(
+                certificate_id=created_cert.id,
+                ssl_forced=ssl_forced,
+                hsts_enabled=hsts_enabled,
+                http2_support=True
+            )
+        )
+
+        return created_cert, updated_proxy
