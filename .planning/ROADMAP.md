@@ -48,12 +48,15 @@ Plans:
 ### Phase 3: Proxy Host Management
 **Goal**: Implement complete proxy host lifecycle (create, list, update, delete) via NPM API
 **Depends on**: Phase 2
-**Research**: Likely (external API)
+**Research**: Completed
 **Research topics**: NPM proxy host API endpoints, data structures, CRUD operations, validation requirements
-**Plans**: TBD
+**Plans**: 3 planned, 0 complete
+**Status**: Planned, ready to execute
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 03-01: API Foundation (exceptions + Pydantic models, TDD)
+- [ ] 03-02: API Client CRUD (NPMClient methods, TDD)
+- [ ] 03-03: CLI Commands (proxy commands + verification checkpoint)
 
 ### Phase 4: SSL Certificate Automation
 **Goal**: End-to-end SSL certificate workflow from creation to NPM integration to proxy host attachment
@@ -92,7 +95,7 @@ Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 1/1 | Complete | 2026-01-04 |
 | 2. NPM Connection & Authentication | 3/3 | Complete | 2026-01-04 |
-| 3. Proxy Host Management | 0/TBD | Not started | - |
+| 3. Proxy Host Management | 0/3 | Planned | - |
 | 4. SSL Certificate Automation | 0/TBD | Not started | - |
 | 5. Configuration Templates | 0/TBD | Not started | - |
 | 6. Testing & Documentation | 0/TBD | Not started | - |
