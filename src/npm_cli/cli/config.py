@@ -124,7 +124,7 @@ def status() -> None:
             console.print(f"  [green]✓[/green] Container found: [cyan]{container.name}[/cyan]")
             console.print(f"  [dim]Status: {container.status}[/dim]")
         else:
-            console.print(f"  [yellow]⚠[/yellow] NPM container not found")
+            console.print("  [yellow]⚠[/yellow] NPM container not found")
             console.print(f"  [dim]Searched for: {settings.container_name}[/dim]")
     else:
         console.print("  [yellow]⚠[/yellow] Docker unavailable (using manual URL configuration)")
@@ -147,7 +147,7 @@ def status() -> None:
                 time_left = expires - now
                 hours = int(time_left.total_seconds() / 3600)
                 minutes = int((time_left.total_seconds() % 3600) / 60)
-                console.print(f"  [green]✓[/green] Token valid")
+                console.print("  [green]✓[/green] Token valid")
                 console.print(f"  [dim]Expires in: {hours}h {minutes}m ({expires_str})[/dim]")
             else:
                 console.print("  [red]✗[/red] Token expired")
