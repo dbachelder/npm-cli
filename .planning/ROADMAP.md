@@ -15,7 +15,7 @@ None
 - [x] **Phase 3: Proxy Host Management** - Core CRUD operations for proxy hosts via NPM API
 - [x] **Phase 4: SSL Certificate Automation** - End-to-end certificate creation and attachment workflow
 - [x] **Phase 5: Configuration Templates** - Reusable templates for common patterns (Authentik, VPN-only, API bypass)
-- [ ] **Phase 6: Testing & Documentation** - Reproducible test suite and user-friendly docs for public release
+- [x] **Phase 6: Testing & Documentation** - Reproducible test suite and user-friendly docs for public release
 
 ## Phase Details
 
@@ -88,11 +88,14 @@ Plans:
 ### Phase 6: Testing & Documentation
 **Goal**: Reproducible test suite with dedicated NPM container, ZSH autocomplete, and user-friendly documentation for public release
 **Depends on**: Phase 5
-**Research**: Unlikely (standard testing and documentation of established patterns)
-**Plans**: TBD
+**Research**: Completed
+**Research topics**: Testcontainers patterns, CliRunner testing, pytest-httpx mocking
+**Plans**: 1/TBD complete
+**Status**: In progress
+**Completed**: -
 
 Plans:
-- [ ] TBD during phase planning
+- [x] 06-01: Integration testing setup (testcontainers, CliRunner, pytest-httpx) — 11 min
 
 ## Progress
 
@@ -106,4 +109,4 @@ Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Proxy Host Management | 3/3 | Complete | 2026-01-04 |
 | 4. SSL Certificate Automation | 3/3 | Complete | 2026-01-04 |
 | 5. Configuration Templates | 1/1 | Complete | 2026-01-04 |
-| 6. Testing & Documentation | 0/TBD | Not started | - |
+| 6. Testing & Documentation | 1/TBD | In progress | - |
