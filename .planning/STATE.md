@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-04)
 ## Current Position
 
 Phase: 3 of 6 (Proxy Host Management)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-04 — Completed 03-02-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-01-04 — Completed 03-03-PLAN.md
 
-Progress: ██████░░░░ 50% (6 of 12 plans complete)
+Progress: ███████░░░ 58% (7 of 12 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 12 min
-- Total execution time: 72 min
+- Total plans completed: 7
+- Average duration: 13 min
+- Total execution time: 94 min
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: ██████░░░░ 50% (6 of 12 plans complete)
 |-------|-------|-------|----------|
 | 1. Foundation | 1 | 8 min | 8 min |
 | 2. Connection & Auth | 3 | 34 min | 11 min |
-| 3. Proxy Host Management | 2 | 30 min | 15 min |
+| 3. Proxy Host Management | 3 | 52 min | 17 min |
 
 **Recent Trend:**
-- Last plan: 23 min
-- Trend: TDD workflow with comprehensive test coverage - longer execution for thorough testing
+- Last plan: 22 min
+- Trend: CLI implementation with user feedback iteration - checkpoint-driven development with real-time bug fixes
 
 ## Accumulated Context
 
@@ -57,7 +57,9 @@ Recent decisions affecting current work:
 | 2 | Email format required for NPM authentication | NPM API requires email in identity field, not plain username |
 | 3 | Custom exception hierarchy with response preservation | NPMAPIError base with httpx.Response for debugging, specialized subclasses for connection/validation errors |
 | 3 | ProxyHost model inheritance pattern | ProxyHost inherits from ProxyHostCreate to avoid duplication while adding read-only fields |
-| 3 | Strict model validation (extra="forbid", strict=True) | Catch NPM API schema changes immediately given undocumented API |
+| 3 | Relaxed validation (extra="ignore") instead of extra="forbid" | NPM API undocumented, returns extra fields - validate required fields but don't break on API additions |
+| 3 | GET-merge-PUT pattern for proxy host updates | NPM PUT requires full object but rejects read-only fields - extract writable fields only, normalize nulls, merge updates |
+| 3 | Domain-based lookup for show command | UX improvement - users remember domains better than IDs, searches domain_names field |
 
 ### Deferred Issues
 
@@ -70,6 +72,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-04
-Stopped at: Completed 03-02-PLAN.md (API Client CRUD)
+Stopped at: Completed 03-03-PLAN.md (Phase 3 complete - Proxy Host Management)
 Resume file: None
-Next action: Execute 03-03-PLAN.md
+Next action: Plan Phase 4 (SSL Certificate Automation)
