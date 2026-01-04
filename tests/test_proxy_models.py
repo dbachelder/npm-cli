@@ -62,21 +62,23 @@ class TestProxyHostCreate:
         assert host.meta == {"custom": "value"}
         assert host.locations == [{"path": "/api", "forward_host": "api.local"}]
 
-    def test_rejects_extra_fields(self):
-        """ProxyHostCreate rejects unknown fields (extra='forbid')."""
+    def test_ignores_extra_fields(self):
+        """ProxyHostCreate ignores unknown fields (extra='ignore')."""
         data = {
             "domain_names": ["example.com"],
             "forward_scheme": "http",
             "forward_host": "backend.local",
             "forward_port": 8080,
-            "unknown_field": "should fail",
+            "unknown_field": "should be ignored",
+            "extra_field": 123,
         }
+        # Should not raise ValidationError
+        host = ProxyHostCreate(**data)
 
-        with pytest.raises(ValidationError) as exc_info:
-            ProxyHostCreate(**data)
-
-        error = exc_info.value
-        assert "unknown_field" in str(error).lower() or "extra" in str(error).lower()
+        assert host.domain_names == ["example.com"]
+        # Extra fields should be silently ignored
+        assert not hasattr(host, "unknown_field")
+        assert not hasattr(host, "extra_field")
 
     def test_requires_domain_names(self):
         """ProxyHostCreate requires domain_names field."""
@@ -424,18 +426,20 @@ class TestProxyHostUpdate:
         assert host.enabled is False
         assert host.domain_names is None
 
-    def test_rejects_extra_fields(self):
-        """ProxyHostUpdate rejects unknown fields (extra='forbid')."""
+    def test_ignores_extra_fields(self):
+        """ProxyHostUpdate ignores unknown fields (extra='ignore')."""
         data = {
             "domain_names": ["example.com"],
-            "invalid_field": "should fail",
+            "invalid_field": "should be ignored",
+            "extra_field": 999,
         }
+        # Should not raise ValidationError
+        host = ProxyHostUpdate(**data)
 
-        with pytest.raises(ValidationError) as exc_info:
-            ProxyHostUpdate(**data)
-
-        error = exc_info.value
-        assert "invalid_field" in str(error).lower() or "extra" in str(error).lower()
+        assert host.domain_names == ["example.com"]
+        # Extra fields should be silently ignored
+        assert not hasattr(host, "invalid_field")
+        assert not hasattr(host, "extra_field")
 
     def test_validates_domain_names_when_provided(self):
         """ProxyHostUpdate validates domain_names constraints when provided."""

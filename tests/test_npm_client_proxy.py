@@ -596,21 +596,28 @@ class TestNPMClientUpdateProxyHost:
         client = NPMClient(base_url="http://localhost:81")
         result = client.update_proxy_host(5, host_update)
 
-        # Verify request was made correctly
-        mock_http_client.request.assert_called_once()
-        call_args = mock_http_client.request.call_args
-        assert call_args[0] == ("PUT", "/api/nginx/proxy-hosts/5")
-        assert "Authorization" in call_args[1]["headers"]
+        # Verify TWO requests were made: GET then PUT
+        # (update_proxy_host does GET to fetch current state, then PUT to update)
+        assert mock_http_client.request.call_count == 2
 
-        # Verify payload used exclude_none=True and mode="json"
-        json_payload = call_args[1]["json"]
+        # Verify first call was GET
+        first_call_args = mock_http_client.request.call_args_list[0]
+        assert first_call_args[0] == ("GET", "/api/nginx/proxy-hosts/5")
+
+        # Verify second call was PUT
+        second_call_args = mock_http_client.request.call_args_list[1]
+        assert second_call_args[0] == ("PUT", "/api/nginx/proxy-hosts/5")
+        assert "Authorization" in second_call_args[1]["headers"]
+
+        # Verify payload includes merged fields (updated + existing from GET)
+        json_payload = second_call_args[1]["json"]
         assert json_payload["domain_names"] == ["updated.example.com"]
         assert json_payload["forward_scheme"] == "https"
         assert json_payload["ssl_forced"] is True
         assert json_payload["allow_websocket_upgrade"] is True
-        # Verify None fields were excluded
-        assert "forward_host" not in json_payload
-        assert "forward_port" not in json_payload
+        # Verify existing fields from GET were included
+        assert json_payload["forward_host"] == "192.168.1.250"
+        assert json_payload["forward_port"] == 8443
 
         # Verify result is ProxyHost object
         assert isinstance(result, ProxyHost)
