@@ -328,6 +328,49 @@ uv run ruff check src/ --fix
 uv run ruff format src/
 ```
 
+### Publishing
+
+**Building the package:**
+
+```bash
+# Build wheel and source distribution
+uv build
+
+# Verify package contents
+tar -tzf dist/npm_cli-*.tar.gz
+```
+
+**Test local installation:**
+
+```bash
+# Create test environment
+uv venv test-install
+
+# Install from wheel
+uv pip install dist/npm_cli-*.whl --python test-install/bin/python
+
+# Test CLI
+test-install/bin/npm-cli --help
+test-install/bin/npm-cli version
+
+# Clean up
+rm -rf test-install
+```
+
+**Publish to PyPI:**
+
+```bash
+# Set PyPI token
+export PYPI_TOKEN="pypi-..."
+
+# Publish
+uv publish
+
+# Create release tag
+git tag -a v0.1.0 -m "Release v0.1.0 - Initial public release"
+git push origin v0.1.0
+```
+
 ### Project Structure
 
 ```
