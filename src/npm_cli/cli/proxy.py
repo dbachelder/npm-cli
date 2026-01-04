@@ -11,6 +11,12 @@ from npm_cli.api.client import NPMClient
 from npm_cli.api.models import ProxyHostCreate, ProxyHostUpdate
 from npm_cli.api.exceptions import NPMAPIError, NPMConnectionError, NPMValidationError
 from npm_cli.config.settings import NPMSettings
+from npm_cli.templates.nginx import (
+    authentik_forward_auth,
+    api_webhook_bypass,
+    vpn_only_access,
+    websocket_support,
+)
 
 app = typer.Typer(help="Manage proxy hosts")
 console = Console()
@@ -344,6 +350,111 @@ def delete_proxy_host(
     except typer.Abort:
         console.print("[yellow]Cancelled[/]")
         raise typer.Exit(0)
+    except NPMConnectionError as e:
+        console.print(f"[bold red]Connection Error:[/] {e}")
+        console.print("[dim]Is the NPM container running?[/]")
+        raise typer.Exit(1)
+    except NPMAPIError as e:
+        console.print(f"[bold red]API Error:[/] {e}")
+        if e.response:
+            console.print(f"[dim]Status:[/] {e.response.status_code}")
+            console.print(f"[dim]Response:[/] {e.response.text[:200]}")
+        raise typer.Exit(1)
+    except NPMValidationError as e:
+        console.print(f"[bold red]Validation Error:[/] {e}")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] {e}")
+        raise typer.Exit(1)
+
+
+@app.command("template")
+def apply_template(
+    host_id: int = typer.Argument(..., help="Proxy host ID to apply template to"),
+    template_name: Literal["authentik", "api-bypass", "vpn-only", "websocket"] = typer.Argument(..., help="Template to apply"),
+    backend: str = typer.Option(None, "--backend", "-b", help="Backend URL (e.g., http://app:8000)"),
+    paths: list[str] = typer.Option(None, "--path", "-p", help="Paths for api-bypass template (repeat for multiple)"),
+    vpn_network: str = typer.Option("10.10.10.0/24", "--vpn-network", help="VPN network CIDR"),
+    lan_network: str = typer.Option("192.168.7.0/24", "--lan-network", help="LAN network CIDR"),
+    append: bool = typer.Option(False, "--append", "-a", help="Append to existing advanced_config instead of replacing"),
+) -> None:
+    """Apply nginx configuration template to proxy host."""
+    try:
+        # Load settings
+        settings = NPMSettings()
+
+        # Create client and authenticate
+        client = NPMClient(base_url=str(settings.api_url), timeout=30.0)
+        if settings.username and settings.password:
+            try:
+                client.authenticate(settings.username, settings.password)
+            except RuntimeError:
+                pass
+
+        # Fetch existing proxy host
+        host = client.get_proxy_host(host_id)
+
+        # Determine backend URL
+        if backend is None:
+            backend = f"{host.forward_scheme}://{host.forward_host}:{host.forward_port}"
+
+        # Validate required options and generate template config
+        template_config = ""
+
+        if template_name == "authentik":
+            # Authentik requires backend
+            template_config = authentik_forward_auth(
+                backend=backend,
+                vpn_only=False,  # Can be enhanced later
+                vpn_network=vpn_network,
+                lan_network=lan_network
+            )
+
+        elif template_name == "api-bypass":
+            # API bypass requires paths
+            if not paths:
+                console.print("[bold red]Error:[/] --path is required for api-bypass template")
+                console.print("[dim]Example: npm-cli proxy template 7 api-bypass --path /api/ --path /webhook/[/]")
+                raise typer.Exit(1)
+
+            template_config = api_webhook_bypass(backend=backend, paths=list(paths))
+
+        elif template_name == "vpn-only":
+            template_config = vpn_only_access(
+                vpn_network=vpn_network,
+                lan_network=lan_network
+            )
+
+        elif template_name == "websocket":
+            template_config = websocket_support()
+
+        # Apply template (append or replace)
+        if append and host.advanced_config:
+            new_config = f"{host.advanced_config}\n\n{template_config}"
+        else:
+            new_config = template_config
+
+        # Update proxy host with new advanced_config
+        client.update_proxy_host(
+            host_id=host_id,
+            updates=ProxyHostUpdate(advanced_config=new_config)
+        )
+
+        # Print success with preview
+        console.print(f"[green]✓[/] Applied [cyan]{template_name}[/] template to proxy host [cyan]{host_id}[/]")
+        console.print("\n[bold]Template preview (first 5 lines):[/]")
+
+        preview_lines = template_config.split("\n")[:5]
+        for line in preview_lines:
+            console.print(f"  {line}")
+
+        config_lines = template_config.split("\n")
+        if len(config_lines) > 5:
+            remaining = len(config_lines) - 5
+            console.print(f"  [dim]... ({remaining} more lines)[/]")
+
+        console.print(f"\n[dim]View full config: npm-cli proxy show {host_id}[/]")
+
     except NPMConnectionError as e:
         console.print(f"[bold red]Connection Error:[/] {e}")
         console.print("[dim]Is the NPM container running?[/]")
