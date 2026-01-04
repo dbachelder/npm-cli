@@ -207,3 +207,45 @@ class ProxyHostUpdate(BaseModel):
         default=None,
         description="Custom location blocks"
     )
+
+
+class CertificateCreate(BaseModel):
+    """Request model for creating Let's Encrypt certificate.
+
+    Used for POST /api/nginx/certificates to create new SSL certificates via NPM.
+    NPM delegates to Certbot internally for Let's Encrypt certificate acquisition.
+    """
+    model_config = ConfigDict(extra="ignore", strict=True)
+
+    # Required fields
+    domain_names: list[str] = Field(
+        min_length=1,
+        description="Domains for certificate (first is primary, rest are SANs)"
+    )
+    meta: dict = Field(
+        description="Provider-specific metadata (letsencrypt_email, dns_provider, etc.)"
+    )
+
+    # Optional fields with defaults
+    nice_name: str = Field(
+        default="",
+        description="Human-readable certificate name"
+    )
+    provider: Literal["letsencrypt"] = Field(
+        default="letsencrypt",
+        description="Certificate provider"
+    )
+
+
+class Certificate(CertificateCreate):
+    """Response model for certificate with read-only fields.
+
+    Used for GET /api/nginx/certificates responses.
+    Inherits all fields from CertificateCreate and adds server-generated fields.
+    """
+
+    id: int = Field(ge=1, description="Certificate ID")
+    created_on: str = Field(description="Creation timestamp (ISO 8601)")
+    modified_on: str = Field(description="Last modification timestamp (ISO 8601)")
+    expires_on: str = Field(description="Certificate expiration timestamp (ISO 8601)")
+    owner_user_id: int = Field(ge=1, description="Owner user ID")
