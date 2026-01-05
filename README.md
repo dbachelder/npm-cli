@@ -2,7 +2,9 @@
 
 **Command-line tool for managing Nginx Proxy Manager via API**
 
-Transform multi-step manual operations (SQL queries, file editing, docker exec commands) into single-command workflows with validation and safety.
+Manage your NPM install via intuitive CLI commands. This tool was created for my personal workflow that uses Claude Code to manage my home lab. It probably has some gaps, and I'll happily accept issues or contributions. 
+
+![NPM CLI Demo](images/proxy-list-demo.png)
 
 ## Features
 

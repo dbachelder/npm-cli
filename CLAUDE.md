@@ -189,6 +189,35 @@ uv tool install --reinstall .
 uv run npm-cli proxy list
 ```
 
+## Documentation Screenshots
+
+**Demo Environment for Screenshots:**
+The project includes demo setup scripts for taking documentation screenshots with fake data (no real domains/IPs exposed).
+
+Demo scripts are created in the working directory when needed:
+- `docker-compose.demo.yml` - Isolated NPM instance on ports 18080/18443/18181
+- `scripts/setup-demo-simple.sh` - Automated setup with fake proxy hosts
+- `scripts/teardown-demo.sh` - Complete cleanup
+- `scripts/change-admin-password.py` - Programmatic password change via API
+
+**Taking Screenshots:**
+```bash
+# Start demo instance and populate with fake data
+docker compose -f docker-compose.demo.yml up -d
+NPM_PASSWORD='demo1234' ./scripts/setup-demo-simple.sh
+
+# Take screenshots
+export NPM_API_URL='http://localhost:18181'
+export NPM_USERNAME='admin@example.com'
+export NPM_PASSWORD='demo1234'
+uv run npm-cli proxy list  # Screenshot this output
+
+# Clean up
+./scripts/teardown-demo.sh
+```
+
+Screenshots are stored in `images/` directory and referenced in README.md with relative paths.
+
 ## Planning Context
 
 This project uses the GSD (Get Shit Done) workflow with phases and plans in `.planning/`. All 7 phases are complete (Foundation, Connection & Auth, Proxy Host Management, SSL Certificate Automation, Configuration Templates, Testing & Documentation, Distribution). Package is published on PyPI. See `.planning/ROADMAP.md` for full history.

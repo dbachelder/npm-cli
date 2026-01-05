@@ -112,7 +112,7 @@ def create_proxy_host(
             forward_scheme=forward_scheme,
             forward_host=forward_host,
             forward_port=forward_port,
-            certificate_id=certificate,
+            certificate_id=certificate if certificate is not None else 0,
             ssl_forced=ssl,
             allow_websocket_upgrade=websocket,
             http2_support=http2,
