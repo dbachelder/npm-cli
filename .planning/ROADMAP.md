@@ -16,7 +16,8 @@ None
 - [x] **Phase 4: SSL Certificate Automation** - End-to-end certificate creation and attachment workflow
 - [x] **Phase 5: Configuration Templates** - Reusable templates for common patterns (Authentik, VPN-only, API bypass)
 - [x] **Phase 6: Testing & Documentation** - Reproducible test suite and user-friendly docs for public release
-- [ ] **Phase 7: Distribution** - Package and publish to PyPI for public distribution
+- [x] **Phase 7: Distribution** - Package and publish to PyPI for public distribution
+- [x] **Phase 8: Proxy Clone Command** - Clone existing proxy hosts with new domain names and automatic SSL certificate provisioning
 
 ## Phase Details
 
@@ -112,10 +113,23 @@ Plans:
 **Details:**
 Complete package metadata with PyPI classifiers, MIT license, successful build with wheel and source distribution, local installation verified. Package ready for PyPI publication (awaiting credentials).
 
+### Phase 8: Proxy Clone Command
+**Goal**: Implement proxy host cloning with automatic SSL certificate provisioning for new domains
+**Depends on**: Phase 7
+**Plans**: 1/1 complete
+**Status**: Complete
+**Completed**: 2026-01-05
+
+Plans:
+- [x] 08-01: Proxy clone command with automatic SSL provisioning — 25 min
+
+**Details:**
+Clone existing proxy hosts to new domain names with a single command (`npm-cli proxy clone <id|domain> <new-domain>`). Automatically provisions new SSL certificates if the source proxy has one attached, preserving all other configuration (backend, templates, network restrictions, etc.).
+
 ## Progress
 
 **Execution Order:**
-Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -126,3 +140,4 @@ Phases execute sequentially: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 5. Configuration Templates | 1/1 | Complete | 2026-01-04 |
 | 6. Testing & Documentation | 2/2 | Complete | 2026-01-04 |
 | 7. Distribution | 1/1 | Complete | 2026-01-04 |
+| 8. Proxy Clone Command | 1/1 | Complete | 2026-01-05 |
