@@ -9,6 +9,7 @@ Manage your NPM install via intuitive CLI commands. This tool was created for my
 ## Features
 
 - **Proxy Host Management** - Create, list, update, and delete proxy hosts via NPM API
+- **Proxy Cloning** - Clone existing proxy hosts to new domains with automatic SSL certificate provisioning
 - **SSL Certificate Automation** - End-to-end workflow: certificate creation, NPM integration, and attachment to proxy hosts
 - **Configuration Templates** - Reusable patterns for common scenarios:
   - Authentik forward authentication with SSO
@@ -104,6 +105,23 @@ npm-cli proxy list
 
 View all configured proxy hosts in a formatted table.
 
+### 5. Clone Existing Proxies
+
+Quickly create similar proxy configurations by cloning:
+
+```bash
+# Clone with automatic SSL provisioning (if source has cert)
+npm-cli proxy clone app.example.com app2.example.com
+
+# Clone without SSL even if source has it
+npm-cli proxy clone app.example.com test.example.com --no-ssl
+
+# Clone by ID
+npm-cli proxy clone 42 newapp.example.com
+```
+
+The clone command copies all configuration (backend, SSL settings, advanced config, templates) from the source proxy to new domain(s), automatically provisioning a new SSL certificate if the source has one attached.
+
 ## Usage Examples
 
 ### Proxy Host Management
@@ -146,6 +164,36 @@ npm-cli proxy update example.com \
 ```bash
 npm-cli proxy delete example.com
 ```
+
+#### Clone Proxy Host
+
+Clone an existing proxy to new domain(s) with automatic SSL provisioning:
+
+```bash
+# Clone by domain name (auto-provisions SSL if source has cert)
+npm-cli proxy clone source.example.com new.example.com
+
+# Clone by ID
+npm-cli proxy clone 5 clone.example.com
+
+# Clone without SSL certificate provisioning
+npm-cli proxy clone app.example.com test.example.com --no-ssl
+
+# Clone to multiple domains (comma-separated)
+npm-cli proxy clone app.example.com "app1.local,app2.local"
+```
+
+**What gets cloned:**
+- All backend configuration (scheme, host, port)
+- SSL settings (forced HTTPS, HSTS)
+- Advanced nginx configuration
+- WebSocket support
+- Access lists
+- All other proxy settings
+
+**What changes:**
+- Domain names (replaced with new domain)
+- SSL certificate (new cert created if source has one, unless --no-ssl)
 
 ### SSL Certificate Management
 
