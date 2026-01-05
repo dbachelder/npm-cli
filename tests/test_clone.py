@@ -255,6 +255,9 @@ class TestCloneProxyHost:
         # Mock get_proxy_host to return source with cert
         mock_client.get_proxy_host = Mock(return_value=source_proxy_with_cert)
 
+        # Mock certificate_create to track if it's called
+        mock_client.certificate_create = Mock()
+
         # Mock create_proxy_host
         cloned_no_cert = ProxyHost(
             id=12,
@@ -289,7 +292,7 @@ class TestCloneProxyHost:
         )
 
         # Verify certificate_create was NOT called
-        assert not hasattr(mock_client, "certificate_create") or not mock_client.certificate_create.called
+        mock_client.certificate_create.assert_not_called()
 
         # Verify proxy was created without certificate
         create_call = mock_client.create_proxy_host.call_args[0][0]

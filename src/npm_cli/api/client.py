@@ -462,6 +462,80 @@ class NPMClient:
                 response=e.response
             )
 
+    def clone_proxy_host(
+        self,
+        source_identifier: str | int,
+        new_domains: list[str],
+        provision_ssl: bool = True
+    ) -> ProxyHost:
+        """Clone proxy host to new domain(s) with optional SSL provisioning.
+
+        Copies all configuration from source proxy (backend, SSL settings,
+        advanced config, etc.) to new domain(s). Automatically provisions
+        a new SSL certificate if source has one and provision_ssl is True.
+
+        Args:
+            source_identifier: Source proxy host ID (int) or domain name (str)
+            new_domains: List of domain names for the cloned proxy
+            provision_ssl: Create new SSL certificate if source has one (default: True)
+
+        Returns:
+            Created ProxyHost object
+
+        Raises:
+            ValueError: If source proxy not found or multiple matches for domain
+            NPMAPIError: If proxy creation or certificate provisioning fails
+        """
+        # 1. Look up source proxy host
+        if isinstance(source_identifier, int):
+            # Direct ID lookup
+            source = self.get_proxy_host(source_identifier)
+        else:
+            # Domain name lookup
+            all_hosts = self.list_proxy_hosts()
+            matching_hosts = [h for h in all_hosts if source_identifier in h.domain_names]
+
+            if not matching_hosts:
+                raise ValueError(f"Proxy host not found for domain: {source_identifier}")
+            elif len(matching_hosts) > 1:
+                raise ValueError(
+                    f"Multiple proxy hosts found for domain: {source_identifier}. "
+                    f"Use proxy host ID instead for specific match."
+                )
+
+            source = matching_hosts[0]
+
+        # 2. Create ProxyHostCreate from source fields
+        # Copy only writable fields (exclude id, created_on, modified_on, owner_user_id)
+        writable_fields = ProxyHostCreate.model_fields.keys()
+        source_data = {
+            k: v for k, v in source.model_dump(mode="json").items()
+            if k in writable_fields
+        }
+
+        # Set new domain names
+        source_data["domain_names"] = new_domains
+
+        # Reset certificate_id (will be set later if SSL provisioning)
+        source_data["certificate_id"] = None
+
+        # 3. Provision SSL certificate if source has one and provision_ssl is True
+        if provision_ssl and source.certificate_id is not None:
+            # Create new certificate for new domains
+            cert = CertificateCreate(
+                provider="letsencrypt",
+                domain_names=new_domains,
+                meta={}
+            )
+            new_cert = self.certificate_create(cert)
+
+            # Attach certificate to proxy data
+            source_data["certificate_id"] = new_cert.id
+
+        # 4. Create proxy host with cloned configuration
+        proxy_create = ProxyHostCreate(**source_data)
+        return self.create_proxy_host(proxy_create)
+
     def attach_certificate_to_proxy(
         self,
         domain: str,
