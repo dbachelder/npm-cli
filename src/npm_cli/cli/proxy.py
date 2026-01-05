@@ -369,6 +369,96 @@ def delete_proxy_host(
         raise typer.Exit(1)
 
 
+@app.command("clone")
+def clone_proxy_host(
+    source: str = typer.Argument(..., help="Source proxy host ID or domain name"),
+    new_domain: str = typer.Argument(..., help="New domain name(s) - comma-separated for multiple"),
+    no_ssl: bool = typer.Option(False, "--no-ssl", help="Skip SSL certificate provisioning even if source has cert"),
+) -> None:
+    """Clone proxy host to new domain(s) with automatic SSL provisioning.
+
+    Copies all configuration from source proxy (backend, SSL settings, advanced config)
+    to new domain(s). Automatically provisions a new SSL certificate if the source
+    has one attached (unless --no-ssl is used).
+
+    Examples:
+        # Clone by domain name with automatic SSL
+        npm-cli proxy clone app.example.com app2.example.com
+
+        # Clone by ID without SSL
+        npm-cli proxy clone 5 test.example.com --no-ssl
+
+        # Clone to multiple domains
+        npm-cli proxy clone app.example.com "app1.local,app2.local"
+    """
+    try:
+        # Parse new_domain: split by comma, strip whitespace
+        new_domains = [d.strip() for d in new_domain.split(",")]
+
+        # Load settings
+        settings = NPMSettings()
+
+        # Create client and authenticate
+        client = NPMClient(base_url=str(settings.api_url), timeout=30.0)
+        if settings.username and settings.password:
+            try:
+                client.authenticate(settings.username, settings.password)
+            except RuntimeError:
+                pass
+
+        # Determine if source is ID or domain
+        source_identifier: str | int = int(source) if source.isdigit() else source
+
+        # Clone proxy host
+        result = client.clone_proxy_host(
+            source_identifier=source_identifier,
+            new_domains=new_domains,
+            provision_ssl=not no_ssl
+        )
+
+        # Build success message
+        backend = f"{result.forward_scheme}://{result.forward_host}:{result.forward_port}"
+        domains_display = ", ".join(result.domain_names)
+
+        details = f"""[bold]Proxy Host ID:[/] {result.id}
+[bold]Domains:[/] {domains_display}
+[bold]Backend:[/] {backend}"""
+
+        if result.certificate_id:
+            details += f"\n[bold]SSL Certificate:[/] ID {result.certificate_id} (created and attached)"
+        elif no_ssl:
+            details += "\n[bold]SSL Certificate:[/] None (--no-ssl used)"
+        else:
+            details += "\n[bold]SSL Certificate:[/] None (source had no certificate)"
+
+        panel = Panel(
+            details,
+            title="[green]Proxy Host Cloned Successfully[/]",
+            border_style="green"
+        )
+        console.print(panel)
+
+    except ValueError as e:
+        console.print(f"[bold red]Error:[/] {e}")
+        raise typer.Exit(1)
+    except NPMConnectionError as e:
+        console.print(f"[bold red]Connection Error:[/] {e}")
+        console.print("[dim]Is the NPM container running?[/]")
+        raise typer.Exit(1)
+    except NPMAPIError as e:
+        console.print(f"[bold red]API Error:[/] {e}")
+        if e.response:
+            console.print(f"[dim]Status:[/] {e.response.status_code}")
+            console.print(f"[dim]Response:[/] {e.response.text[:200]}")
+        raise typer.Exit(1)
+    except NPMValidationError as e:
+        console.print(f"[bold red]Validation Error:[/] {e}")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] {e}")
+        raise typer.Exit(1)
+
+
 @app.command("template")
 def apply_template(
     host_id: int = typer.Argument(..., help="Proxy host ID to apply template to"),
