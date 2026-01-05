@@ -36,7 +36,11 @@ class TestAuthentikForwardAuth:
         # Verify auth headers preservation
         assert "auth_request_set $auth_cookie $upstream_http_set_cookie" in config
         assert "auth_request_set $authentik_username $upstream_http_x_authentik_username" in config
+        assert "auth_request_set $authentik_groups $upstream_http_x_authentik_groups" in config
+        assert "auth_request_set $authentik_email $upstream_http_x_authentik_email" in config
         assert "proxy_set_header X-authentik-username $authentik_username" in config
+        assert "proxy_set_header X-authentik-groups $authentik_groups" in config
+        assert "proxy_set_header X-authentik-email $authentik_email" in config
 
         # Should NOT have network restrictions
         assert "allow 10.10.10.0/24" not in config
@@ -167,12 +171,17 @@ class TestWebSocketSupport:
         assert 'proxy_set_header Upgrade $http_upgrade' in config
         assert 'proxy_set_header Connection "upgrade"' in config
 
-    def test_inline_snippet(self):
-        """Test that WebSocket returns inline snippet (no location wrapper)."""
+    def test_websocket_in_location_block(self):
+        """Test that WebSocket headers are wrapped in location / block."""
         config = websocket_support()
 
-        # Should NOT have location block wrapper
-        assert "location" not in config.lower()
+        # Should have location block wrapper
+        assert "location /" in config
+        # Headers should be inside the location block
+        lines = config.split('\n')
+        assert lines[0] == "location / {"
+        assert "proxy_http_version 1.1" in config
+        assert lines[-1] == "}"
 
 
 class TestAuthentikWithBypass:

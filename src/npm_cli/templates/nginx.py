@@ -68,8 +68,10 @@ location / {{
     # Preserve auth headers
     auth_request_set $authentik_username $upstream_http_x_authentik_username;
     auth_request_set $authentik_groups $upstream_http_x_authentik_groups;
+    auth_request_set $authentik_email $upstream_http_x_authentik_email;
     proxy_set_header X-authentik-username $authentik_username;
     proxy_set_header X-authentik-groups $authentik_groups;
+    proxy_set_header X-authentik-email $authentik_email;
 
     proxy_pass {backend};
 }}"""
@@ -127,16 +129,19 @@ deny all;"""
 
 
 def websocket_support() -> str:
-    """Generate WebSocket upgrade headers.
+    """Generate WebSocket upgrade headers in location block.
 
-    Inline snippet for inserting into location blocks that need WebSocket support.
+    Wraps WebSocket headers in location / block so they apply to proxied requests.
+    Using advanced_config means this replaces the default location block behavior.
 
     Returns:
-        Nginx proxy headers for WebSocket protocol upgrade
+        Nginx location block with WebSocket proxy headers
     """
-    return """proxy_http_version 1.1;
-proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection "upgrade";"""
+    return """location / {
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}"""
 
 
 def authentik_with_bypass(
