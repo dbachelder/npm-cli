@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Command-line tool for managing Nginx Proxy Manager via API"
 readme = "README.md"
 authors = [
-    { name = "dan", email = "dan@zumper.com" }
+    { name = "dan", email = "dan@codesushi.com" }
 ]
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -33,10 +33,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/npm-cli"
-Repository = "https://github.com/yourusername/npm-cli"
-Issues = "https://github.com/yourusername/npm-cli/issues"
-Documentation = "https://github.com/yourusername/npm-cli#readme"
+Homepage = "https://github.com/dbachelder/npm-cli"
+Repository = "https://github.com/dbachelder/npm-cli"
+Issues = "https://github.com/dbachelder/npm-cli/issues"
+Documentation = "https://github.com/dbachelder/npm-cli#readme"
 
 [project.scripts]
 npm-cli = "npm_cli.__main__:main"
