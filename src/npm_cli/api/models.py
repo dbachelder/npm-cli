@@ -56,9 +56,9 @@ class ProxyHostCreate(BaseModel):
     )
 
     # Optional fields with defaults
-    certificate_id: int | Literal["new"] = Field(
-        default=0,
-        description="SSL certificate ID, 0 for none, 'new' to create"
+    certificate_id: int | Literal["new"] | None = Field(
+        default=None,
+        description="SSL certificate ID, 0 for none, 'new' to create, or None to omit"
     )
     ssl_forced: bool = Field(
         default=False,

@@ -24,7 +24,7 @@ class TestProxyHostCreate:
         assert host.forward_host == "backend.local"
         assert host.forward_port == 8080
         # Check defaults
-        assert host.certificate_id == 0
+        assert host.certificate_id is None
         assert host.ssl_forced is False
         assert host.http2_support is True
         assert host.block_exploits is True
