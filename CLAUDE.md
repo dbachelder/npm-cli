@@ -64,7 +64,7 @@ src/npm_cli/
 ### CLI Framework Pattern
 - **Typer** for CLI with subcommands (`app.add_typer()`)
 - **Rich** for formatted console output (use `console.print()`, not `print()`)
-- **Pydantic** for API request/response validation with strict models (`extra="forbid"`)
+- **Pydantic** for API request/response validation with strict models (`extra="forbid"` for API models, `extra="ignore"` for Settings to allow non-NPM env vars)
 - Type hints on all CLI arguments (not decorator strings)
 
 ### NPM API Critical Context
@@ -172,6 +172,23 @@ uv run ruff check src/ --fix
 uv run pytest
 ```
 
+## Distribution
+
+**Published Package:**
+- PyPI: https://pypi.org/project/npm-cli/
+- GitHub: https://github.com/dbachelder/npm-cli
+- Install: `uv tool install npm-cli` or `pip install npm-cli`
+- Current version: 0.1.0
+
+**Installation for Development:**
+```bash
+# Install from local directory as editable
+uv tool install --reinstall .
+
+# Or run without installing
+uv run npm-cli proxy list
+```
+
 ## Planning Context
 
-This project uses the GSD (Get Shit Done) workflow with phases and plans in `.planning/`. Phase 1 (Foundation) is complete. See `.planning/ROADMAP.md` for upcoming phases.
+This project uses the GSD (Get Shit Done) workflow with phases and plans in `.planning/`. All 7 phases are complete (Foundation, Connection & Auth, Proxy Host Management, SSL Certificate Automation, Configuration Templates, Testing & Documentation, Distribution). Package is published on PyPI. See `.planning/ROADMAP.md` for full history.
