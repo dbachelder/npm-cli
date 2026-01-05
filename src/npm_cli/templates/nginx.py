@@ -9,7 +9,8 @@ def authentik_forward_auth(
     backend: str,
     vpn_only: bool = False,
     vpn_network: str = "10.10.10.0/24",
-    lan_network: str = "192.168.7.0/24"
+    lan_network: str = "192.168.7.0/24",
+    auth_domain: str = "auth.codesushi.com"
 ) -> str:
     """Generate Authentik forward auth configuration with optional network restrictions.
 
@@ -18,6 +19,7 @@ def authentik_forward_auth(
         vpn_only: Include VPN/LAN network restrictions in main location block
         vpn_network: VPN network CIDR (default: 10.10.10.0/24 for WireGuard)
         lan_network: LAN network CIDR (default: 192.168.7.0/24)
+        auth_domain: Authentik auth domain (default: auth.codesushi.com)
 
     Returns:
         Nginx configuration with Authentik outpost and auth_request directives
@@ -44,6 +46,13 @@ location /outpost.goauthentik.io {{
     proxy_pass_request_body off;
 }}
 
+# ---- Redirect to sign-in page on auth failure ----
+location @goauthentik_proxy_signin {{
+    internal;
+    add_header Set-Cookie $auth_cookie;
+    return 302 https://{auth_domain}/outpost.goauthentik.io/start?rd=$scheme://$http_host$request_uri;
+}}
+
 # ---- Protect the main app with Authentik ----
 location / {{
 {network_acl}    proxy_set_header Host $host;
@@ -51,7 +60,8 @@ location / {{
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
 
-    auth_request /outpost.goauthentik.io/auth;
+    auth_request /outpost.goauthentik.io/auth/nginx;
+    error_page 401 = @goauthentik_proxy_signin;
     auth_request_set $auth_cookie $upstream_http_set_cookie;
     add_header Set-Cookie $auth_cookie;
 
@@ -134,7 +144,8 @@ def authentik_with_bypass(
     bypass_paths: list[str],
     vpn_only: bool = True,
     vpn_network: str = "10.10.10.0/24",
-    lan_network: str = "192.168.7.0/24"
+    lan_network: str = "192.168.7.0/24",
+    auth_domain: str = "auth.codesushi.com"
 ) -> str:
     """Generate combined Authentik auth + API/webhook bypass configuration.
 
@@ -149,6 +160,7 @@ def authentik_with_bypass(
         vpn_only: Include VPN/LAN network restrictions (default: True)
         vpn_network: VPN network CIDR (default: 10.10.10.0/24 for WireGuard)
         lan_network: LAN network CIDR (default: 192.168.7.0/24)
+        auth_domain: Authentik auth domain (default: auth.codesushi.com)
 
     Returns:
         Nginx configuration with bypass locations, Authentik outpost, and protected root
@@ -161,7 +173,8 @@ def authentik_with_bypass(
         backend=backend,
         vpn_only=vpn_only,
         vpn_network=vpn_network,
-        lan_network=lan_network
+        lan_network=lan_network,
+        auth_domain=auth_domain
     )
 
     # Combine in correct order: bypass paths first, then Authentik protection

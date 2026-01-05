@@ -377,6 +377,7 @@ def apply_template(
     paths: list[str] = typer.Option(None, "--path", "-p", help="Paths for api-bypass template (repeat for multiple)"),
     vpn_network: str = typer.Option("10.10.10.0/24", "--vpn-network", help="VPN network CIDR"),
     lan_network: str = typer.Option("192.168.7.0/24", "--lan-network", help="LAN network CIDR"),
+    auth_domain: str = typer.Option("auth.codesushi.com", "--auth-domain", help="Authentik auth domain"),
     append: bool = typer.Option(False, "--append", "-a", help="Append to existing advanced_config instead of replacing"),
 ) -> None:
     """Apply nginx configuration template to proxy host."""
@@ -408,7 +409,8 @@ def apply_template(
                 backend=backend,
                 vpn_only=False,  # Can be enhanced later
                 vpn_network=vpn_network,
-                lan_network=lan_network
+                lan_network=lan_network,
+                auth_domain=auth_domain
             )
 
         elif template_name == "api-bypass":
@@ -432,7 +434,8 @@ def apply_template(
                 bypass_paths=list(paths),
                 vpn_only=True,  # Default to VPN restrictions for security
                 vpn_network=vpn_network,
-                lan_network=lan_network
+                lan_network=lan_network,
+                auth_domain=auth_domain
             )
 
         elif template_name == "vpn-only":

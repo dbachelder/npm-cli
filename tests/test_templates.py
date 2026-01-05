@@ -23,9 +23,14 @@ class TestAuthentikForwardAuth:
         assert "internal;" in config
         assert "proxy_pass http://authentik-server:9000/outpost.goauthentik.io" in config
 
+        # Verify signin redirect location block
+        assert "location @goauthentik_proxy_signin" in config
+        assert "return 302 https://auth.codesushi.com/outpost.goauthentik.io/start" in config
+
         # Verify main location block with auth_request
         assert "location /" in config
-        assert "auth_request /outpost.goauthentik.io/auth" in config
+        assert "auth_request /outpost.goauthentik.io/auth/nginx" in config
+        assert "error_page 401 = @goauthentik_proxy_signin" in config
         assert "proxy_pass http://app:8000" in config
 
         # Verify auth headers preservation
@@ -63,6 +68,18 @@ class TestAuthentikForwardAuth:
         assert "allow 172.16.0.0/16" in config
         assert "allow 10.0.0.0/24" in config
         assert "proxy_pass http://custom:9999" in config
+
+    def test_authentik_custom_auth_domain(self):
+        """Test Authentik with custom auth domain."""
+        config = authentik_forward_auth(
+            backend="http://app:8000",
+            vpn_only=False,
+            auth_domain="sso.example.com"
+        )
+
+        # Verify signin redirect uses custom domain
+        assert "return 302 https://sso.example.com/outpost.goauthentik.io/start" in config
+        assert "auth.codesushi.com" not in config
 
 
 class TestApiWebhookBypass:
@@ -177,9 +194,13 @@ class TestAuthentikWithBypass:
         assert "location /outpost.goauthentik.io" in config
         assert "internal;" in config
 
+        # Should have signin redirect location
+        assert "location @goauthentik_proxy_signin" in config
+
         # Should have main location with auth_request
         assert "location /" in config
-        assert "auth_request /outpost.goauthentik.io/auth" in config
+        assert "auth_request /outpost.goauthentik.io/auth/nginx" in config
+        assert "error_page 401 = @goauthentik_proxy_signin" in config
 
         # All should proxy to same backend
         assert config.count("proxy_pass http://n8n:5678") == 3
@@ -214,7 +235,9 @@ class TestAuthentikWithBypass:
         # But should still have all other components
         assert "location /webhook/" in config
         assert "location /outpost.goauthentik.io" in config
-        assert "auth_request /outpost.goauthentik.io/auth" in config
+        assert "location @goauthentik_proxy_signin" in config
+        assert "auth_request /outpost.goauthentik.io/auth/nginx" in config
+        assert "error_page 401 = @goauthentik_proxy_signin" in config
 
     def test_combined_with_multiple_bypass_paths(self):
         """Test combined template with multiple bypass paths."""
@@ -250,7 +273,9 @@ class TestAuthentikWithBypass:
 
         # Authentik protection with VPN restrictions
         assert "location /outpost.goauthentik.io" in config
-        assert "auth_request /outpost.goauthentik.io/auth" in config
+        assert "location @goauthentik_proxy_signin" in config
+        assert "auth_request /outpost.goauthentik.io/auth/nginx" in config
+        assert "error_page 401 = @goauthentik_proxy_signin" in config
         assert "allow 10.10.10.0/24" in config
         assert "allow 192.168.7.0/24" in config
         assert "deny all" in config
